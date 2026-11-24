@@ -1,0 +1,39 @@
+.create-expander-analytics-extension {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    position: absolute;
+    right: .75rem;
+    top: 4.625rem;
+    max-width: 50%;
+}
+
+.create-expander-analytics-extension .badge {
+    display: flex;
+    align-items: center;
+    height: 2rem;
+    padding: 0 1rem;
+    margin-left: 1rem;
+    margin-bottom: 1rem;
+    background:  #fff;
+    border-radius: .5rem;
+}
+
+.create-expander-analytics-extension .badge.success {
+    background: var(--control-primary-bg);
+}
+.create-expander-analytics-extension .badge.error {
+    background: var(--control-alert-bg);
+    color: #fff;
+}
+.create-expander-analytics-extension .badge.warning {
+    background: var(--typo-warning);
+}
+
+.create-expander-analytics-extension .badge pre {
+    display: inline-block;
+}
+
+.create-expander-analytics-extension .badge .hint {
+    text-decoration: underline dotted;
+}
