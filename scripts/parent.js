@@ -34,11 +34,16 @@ window.addEventListener("message", (event) => {
         createId: asString(event.data.createId),
         gaId: asString(event.data.gaId),
         title: asString(event.data.title),
+        macros: asStringArray(event.data.macros),
     })
 })
 
 function asString(value) {
     return typeof value === "string" && value !== "" ? value : null
+}
+
+function asStringArray(value) {
+    return Array.isArray(value) ? value.filter(item => typeof item === "string") : []
 }
 
 function render(report) {
@@ -51,6 +56,7 @@ function render(report) {
         checkCreateId(report.createId),
         checkGaId(report.gaId),
         checkTitle(report.title),
+        checkMacros(report.macros),
     )
 }
 
@@ -115,6 +121,14 @@ function checkTitle(title) {
 
 // Content is wrapped in a <span> because .badge is display:flex — bare text
 // nodes would become separate flex items and lose their edge whitespace.
+function checkMacros(macros) {
+    if (macros.length === 0)
+        return badge("success", "✓ All URL macros replaced")
+
+    const more = macros.length > 1 ? ` and ${macros.length - 1} more` : ""
+    return badge("warning", "⚠️ Unresolved URL macro:\u00a0", el("pre", {}, macros[0]), more)
+}
+
 function badge(style, ...children) {
     return el("div", { class: `badge ${style}`.trim() }, el("span", {}, ...children))
 }

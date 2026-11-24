@@ -22,6 +22,7 @@ Open a campaign in Create and go to the **Micropage** tab. When the preview load
 | **Tracking** | Create tracking uses this campaign's ID (click it to open its analytics) | The tracking uses a different campaign's ID | No Create tracking script |
 | **GA** | A known GA property (click it to open the GA report) | A GA ID that isn't one of ours | No GA script |
 | **Titles** | The micropage's HTML `<title>` matches the campaign name | The titles differ (the badge shows the micropage title) | — |
+| **URL macros** | Every `{sh_…}` macro (e.g. `{sh_clickUrl_main}`) was replaced with a real URL | Some macros were left as-is (the badge shows the first one and how many more) | — |
 
 No badges? Reload the page. The extension only works on `create.showheroes.com` with creatives served from `csc-cdn01.showheroes.com`.
 

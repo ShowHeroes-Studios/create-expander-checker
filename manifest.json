@@ -1,6 +1,6 @@
 {
   "name": "Create Expander Checker",
-  "description": "This extension checks the proper implementation of the Create Analytics and other tracking in expanders.",
+  "description": "This extension checks the proper implementation of the Create Analytics and other tracking in expanders. It also checks if all URL macros are properly resolved by Create.",
   "version": "1.0",
   "manifest_version": 3,
   "icons": {

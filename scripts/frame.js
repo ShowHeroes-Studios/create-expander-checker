@@ -1,10 +1,14 @@
-// Runs inside creative iframes. Detects the Create tracking script and the
-// GA (gtag) script and reports what it found to the Create page.
+// Runs inside creative iframes. Detects the Create tracking script, the
+// GA (gtag) script and unreplaced macros, and reports them to the Create page.
 
 const PARENT_ORIGIN = "https://create.showheroes.com"
 const MESSAGE_TYPE = "create-tracking-inspector:report"
 const TRACKING_SRC = "https://static.showheroes.com/customTracking.v1.js"
 const GTAG_SRC = "https://www.googletagmanager.com/gtag"
+
+// Create macros such as {sh_clickUrl_main}, which the ad system should have
+// replaced with real values. Also matches the URL-encoded form %7Bsh_…%7D.
+const MACRO_PATTERN = /(?:\{|%7B)sh_[^{}\s"'<>%]+(?:\}|%7D)/gi
 
 let lastSent = null
 
@@ -33,6 +37,13 @@ function findParam(urls, prefix, param) {
     return null
 }
 
+// Searches the whole page source: attributes (href, src, …), text and inline scripts.
+function findUnreplacedMacros() {
+    const matches = document.documentElement.outerHTML.match(MACRO_PATTERN) ?? []
+    const normalized = matches.map(macro => macro.replace(/^%7B/i, "{").replace(/%7D$/i, "}"))
+    return [...new Set(normalized)]
+}
+
 function report() {
     const urls = collectScriptUrls()
     const message = {
@@ -40,6 +51,7 @@ function report() {
         createId: findParam(urls, TRACKING_SRC, "entity_id"),
         gaId: findParam(urls, GTAG_SRC, "id"),
         title: document.title,
+        macros: findUnreplacedMacros(),
     }
 
     // Only send when something changed, so the parent doesn't re-render needlessly.
