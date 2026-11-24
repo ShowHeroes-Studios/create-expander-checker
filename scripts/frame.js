@@ -1,24 +1,58 @@
-let createId = null
-let gaId = null
+// Runs inside creative iframes. Detects the Create tracking script and the
+// GA (gtag) script and reports what it found to the Create page.
 
-let title = document.title
+const PARENT_ORIGIN = "https://create.showheroes.com"
+const MESSAGE_TYPE = "create-tracking-inspector:report"
+const TRACKING_SRC = "https://static.showheroes.com/customTracking.v1.js"
+const GTAG_SRC = "https://www.googletagmanager.com/gtag"
 
-let scripts = document.getElementsByTagName("script")
+let lastSent = null
 
-for (let script of scripts) {
-    let src = script.getAttribute("src")
-    if (!src)
-        continue
-    if (src.startsWith("https://static.showheroes.com/customTracking.v1.js")) {
-        let url = new URL(src)
-        let params = new URLSearchParams(url.search)
-        createId = params.get("entity_id")
-    }
-    if (src.startsWith("https://www.googletagmanager.com/gtag")) {
-        let url = new URL(src)
-        let params = new URLSearchParams(url.search)
-        gaId = params.get("id")
-    }
+// Script URLs from <script src> tags, plus every script the page has
+// actually loaded (catches scripts injected by JS, even if later removed).
+function collectScriptUrls() {
+    const fromTags = [...document.querySelectorAll("script[src]")].map(script => script.src)
+    const fromNetwork = performance.getEntriesByType("resource")
+        .filter(entry => entry.initiatorType === "script")
+        .map(entry => entry.name)
+    return [...fromTags, ...fromNetwork]
 }
 
-window.parent.postMessage(JSON.stringify({trackingMessage: true, createId: createId, gaId: gaId, title: title }), "*")
+function findParam(urls, prefix, param) {
+    for (const src of urls) {
+        if (!src.startsWith(prefix))
+            continue
+        try {
+            const value = new URL(src).searchParams.get(param)
+            if (value)
+                return value
+        } catch (e) {
+            // malformed URL, ignore
+        }
+    }
+    return null
+}
+
+function report() {
+    const urls = collectScriptUrls()
+    const message = {
+        type: MESSAGE_TYPE,
+        createId: findParam(urls, TRACKING_SRC, "entity_id"),
+        gaId: findParam(urls, GTAG_SRC, "id"),
+        title: document.title,
+    }
+
+    // Only send when something changed, so the parent doesn't re-render needlessly.
+    const serialized = JSON.stringify(message)
+    if (serialized === lastSent)
+        return
+    lastSent = serialized
+
+    window.parent.postMessage(message, PARENT_ORIGIN)
+}
+
+if (window.parent !== window) {
+    report()
+    window.addEventListener("load", report)
+    new PerformanceObserver(report).observe({ type: "resource" })
+}
