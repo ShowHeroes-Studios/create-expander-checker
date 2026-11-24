@@ -9,9 +9,6 @@ const MESSAGE_TYPE = "create-tracking-inspector:report"
 const CONTAINER_CLASS = "create-expander-analytics-extension"
 const TITLE_HINT = "The name of the campaign in Create vs. the HTML title of the micropage"
 
-// Latest report per iframe window, so several iframes don't overwrite each other.
-const reports = new Map()
-
 // Hide the badges whenever the user leaves the "Micropage" tab.
 // Runs once per batch of mutations; bails out early when there's nothing to hide.
 const observer = new MutationObserver(() => {
@@ -33,47 +30,28 @@ window.addEventListener("message", (event) => {
     if (event.data?.type !== MESSAGE_TYPE)
         return
 
-    reports.set(event.source, {
+    render({
         createId: asString(event.data.createId),
         gaId: asString(event.data.gaId),
         title: asString(event.data.title),
     })
-    render()
 })
 
 function asString(value) {
     return typeof value === "string" && value !== "" ? value : null
 }
 
-function render() {
-    // Forget iframes that are no longer on the page.
-    const liveWindows = new Set([...document.querySelectorAll("iframe")].map(frame => frame.contentWindow))
-    for (const source of reports.keys()) {
-        if (!liveWindows.has(source))
-            reports.delete(source)
-    }
-
-    // Identical reports (e.g. desktop + mobile preview of the same page) are shown once.
-    const unique = new Map()
-    for (const report of reports.values())
-        unique.set(JSON.stringify(report), report)
-
+function render(report) {
     clearContainerElement()
     const container = createContainerElement()
     if (!container)
         return
 
-    const showLabels = unique.size > 1
-    let index = 1
-    for (const report of unique.values()) {
-        if (showLabels)
-            container.append(badge("", `Frame ${index++}:`))
-        container.append(
-            checkCreateId(report.createId),
-            checkGaId(report.gaId),
-            checkTitle(report.title),
-        )
-    }
+    container.append(
+        checkCreateId(report.createId),
+        checkGaId(report.gaId),
+        checkTitle(report.title),
+    )
 }
 
 function clearContainerElement() {
