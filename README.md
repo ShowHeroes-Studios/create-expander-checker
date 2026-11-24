@@ -13,15 +13,9 @@ A Chrome extension that checks the tracking set up in expander micropages while 
 
 The extension now appears in the list. It works on its own; there's nothing to click. Just open Create (see below).
 
-### Update to a new version
-
-1. Download and unzip the ZIP again, as above.
-2. Replace the old `create-expander-checker-main` folder with the new one, keeping the same name and location.
-3. Go to `chrome://extensions` and click the reload icon (↻) on the extension's card.
-
 ## Use
 
-Open an Expander campaign in Create and go to the **Micropage** tab. When the preview loads, badges appear in the top right:
+Open an Expander campaign in Create and go to the **Micropage** tab in the right side Preview section. When the preview loads, badges appear in the top right:
 
 | Check | ✓ Green | ⚠️ Yellow | 😵 Red |
 |---|---|---|---|
@@ -31,16 +25,3 @@ Open an Expander campaign in Create and go to the **Micropage** tab. When the pr
 | **URL macros** | Every `{sh_…}` macro (e.g. `{sh_clickUrl_main}`) was replaced with a real URL | Some macros were left as-is (the badge shows the first one and how many more) | — |
 
 No badges? Reload the page. The extension only works on `create.showheroes.com` with creatives served from `csc-cdn01.showheroes.com`.
-
-## Add a GA property
-
-Add an entry to [scripts/ga-properties.js](scripts/ga-properties.js):
-
-```js
-"G-XXXXXXXXXX": {
-    name: "Country",
-    url: "https://analytics.google.com/analytics/web/#/p<property-id>/reports/intelligenthome",
-},
-```
-
-Then reload the extension.
